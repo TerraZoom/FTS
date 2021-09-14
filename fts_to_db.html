@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC"-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" /><title>FTS Convert</title></head>
+
+<body>
+        <div>
+            <textarea cols="50" rows="40"
+                      placeholder="text will appear here">
+            </textarea>
+            <button onclick = "readFiles()">Do It!</button>
+        </div>
+
+<script type="text/javascript">
+
+function readFiles() {
+  console.log("doing it")
+    const int chunkSize = 2 * 1024; // 2KB
+    var inputFiles = new[] { "lm0296", "lm0300" };
+    using (var output = File.Create("output.dat"))
+    {
+        foreach (var file in inputFiles)
+        {
+            using (var input = File.OpenRead(file))
+            {
+                var buffer = new byte[chunkSize];
+                int bytesRead;
+                while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    output.Write(buffer, 0, bytesRead);
+                }
+            }
+        }
+    }
+}
+</script>
+
+
+</body>
+</html>

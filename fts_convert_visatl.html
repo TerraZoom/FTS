@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC"-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" /><title>FTS Convert - VisATL - One File</title></head>
+
+<body>
+        <div>
+            <input id="ftsFilename" type="file">
+
+            <textarea cols="50" rows="40"
+                      placeholder="text will appear here">
+            </textarea>
+            <button onclick = "download_csv()">Download CSV</button>
+        </div>
+
+<script type="text/javascript">
+	// v4: removes all spaces and add just one comma. make line break at every third comma
+	var nComma = 3; // number of commas before return
+
+
+	// removeSpaces = str => str.trim();
+
+	let input = document.querySelector('input');
+	let textarea = document.querySelector('textarea');
+
+
+	input.addEventListener('change', () => {
+		let files = input.files;
+
+		if(files.length == 0) return;
+		const file = files[0];
+
+		let reader = new FileReader();
+
+    // line break at every comma
+  	// const removeSpaces = str => str.replace(/,/g , '').replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/[\s,]+/g, ',').replace(/(,[^,]*),/g, '\r');
+
+  	// this works exactly like I want it. but I'd like to use a repeater to make it more extendable
+  	// const removeSpaces = str => str.replace(/,/g , '').replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/[\s,]+/g, ',').replace(/([^,],[^,]*?,[^,]*?),/g, '$1\r');
+
+    var datafile = lastString(input.value);
+    var atlas = "visatl";
+    console.log("datafile " + datafile);
+
+    // need to find "0-1." string and replace with "0 -1."
+  	const removeSpaces = str => atlas + ',' + datafile + "," + str.replace(/0-1\./g, '0 -1.').replace(/1-1\./g, '1 -1.').replace(/,/g , '').replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/[\s,]+/g, ',').replace(/(([^,]*,){3}([^,]*)),/g, '$1\r' + atlas + ',' + datafile + ',');
+
+
+
+
+
+		reader.onload = (e) => {
+			const file = e.target.result;
+			// const lines = file.split(/\r\n|\n/);
+			// textarea.value = lines.join('\n');
+			// const tsv = file.split("    ");
+      var visatl = 'atlas,datafile,frequency,deduced_telluric_spectrum,observed_photospheric_spectrum,corrected_photospheric_spectrum\n';
+      visatl += removeSpaces(file);
+
+      // display in text area
+			textarea.value = visatl;
+		};
+
+		reader.onerror = (e) => alert(e.target.error.name);
+
+		reader.readAsText(file);
+	});
+
+  // get last string in path
+  function lastString(str) {
+    // getting the filename from the input.value. last value after split array
+    var filename = str.split(/[\\]+/).pop();
+    console.log("file: " + filename);
+    return filename;
+  }
+
+
+  // download CSV
+  function download_csv() {
+
+    var filenameStr = lastString(input.value);
+    // console.log("str: " + filenameStr);
+
+    // save as CSV
+      var hiddenElement = document.createElement('a');
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(textarea.value);
+      hiddenElement.target = '_blank';
+      hiddenElement.download = filenameStr + '.csv';
+      hiddenElement.click();
+  }
+</script>
+
+
+</body>
+</html>

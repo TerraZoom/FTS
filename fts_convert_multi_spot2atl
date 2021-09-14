@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC"-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" /><title>FTS Convert Multiple Files - NIRATL</title></head>
+
+<body>
+        <div>
+            <input type="file" id="ftsFilename" id="fileInput" multiple="multiple" size="60">
+
+            <textarea cols="50" rows="40"
+                      placeholder="text will appear here">
+            </textarea>
+            <button onclick = "download_csv()">Download CSV</button>
+        </div>
+
+<script type="text/javascript">
+	let input = document.querySelector('input');
+	let textarea = document.querySelector('textarea');
+  var message = "";
+
+	input.addEventListener('change', () => {
+		let files = input.files;
+
+
+    if ('files' in input) {
+        if (input.files.length == 0) {
+            message = "Please browse for one or more files.";
+        } else {
+            console.log("got a file");
+            for (var i = 0; i < input.files.length; i++) {
+              (() => {
+                message += "<br /><b>" + (i+1) + ". file</b><br />";
+                var file = input.files[i];
+
+                let reader = new FileReader();
+
+                var atlas = "spot2atl";
+                var datafile = file.name;
+                console.log("datafile " + datafile);
+
+            		reader.onload = (e) => {
+
+                  // var datafile = lastString(input.value);
+                  // console.log("datafile " + datafile);
+
+                  console.log("reading results");
+            			const file = e.target.result;
+                  const removeSpaces = str => atlas + ',' + datafile + "," + str.replace(/[\s,]+/g, ',').replace(/(([^,]*,){2}([^,]*)),/g, '$1\r' + atlas + ',' + datafile + ',');
+
+                  var spectrumListing = 'atlas,datafile,wavenumber,umbral_component,air_mass_spectrum\n';
+                  spectrumListing += removeSpaces(file);
+
+                  // display in text area
+            			textarea.value += spectrumListing;
+            		};
+
+            		reader.onerror = (e) => alert(e.target.error.name);
+            		reader.readAsText(file);
+            })();
+        }
+      }
+	}
+});
+
+  // get last string in path
+  function lastString(str) {
+    // getting the filename from the input.value. last value after split array
+    var filename = str.split(/[\\]+/).pop();
+    console.log("file: " + filename);
+    return filename;
+  }
+
+
+  // download CSV
+  function download_csv() {
+
+    var filenameStr = lastString(input.value);
+    // console.log("str: " + filenameStr);
+
+    // save as CSV
+      var hiddenElement = document.createElement('a');
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(textarea.value);
+      hiddenElement.target = '_blank';
+      hiddenElement.download = filenameStr + '.csv';
+      hiddenElement.click();
+  }
+</script>
+
+
+</body>
+</html>

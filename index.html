@@ -1,0 +1,604 @@
+<html xmlns="html">
+<head>
+        <title>FTS Search</title>
+        <meta charset="utf-8">
+        <link rel="icon" href="data:;base64,=">
+
+		<!-- CSS -->
+		<link href="_css/fts.css" rel="stylesheet">
+    <link href="_css/hover-min.css" rel="stylesheet">
+
+    <!-- libraries -->
+    <script type="text/javascript" src="_js/jquery-3.5.1.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/d3-interpolate-path/build/d3-interpolate-path.min.js"></script>
+    <script src="https://d3js.org/d3-axis.v2.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script>
+
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://kit.fontawesome.com/5efd5c9bde.js" crossorigin="anonymous"></script>
+
+    <!-- FILESAVING -->
+    <!-- filesaver.js saves generated images; Canvas-to-Blob ensures browsler compatibility  -->
+    <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
+    <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfkit@0.10.0/js/pdfkit.standalone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.js"></script>
+    <script type="text/javascript" src="_js/saveSvgAsPng.js"></script>
+    <script type="text/javascript" src="_js/saveSvgAsJpg.js"></script>
+
+
+    <script type="text/javascript">
+      var right,left;
+      var rangeLow = 0;
+      var rangeHigh = 0;
+      var resolution = 0;
+      var shiftValue = 0;
+      var shiftAmount = 0;
+      var shiftLow = 0;
+      var shiftHigh = 0;
+
+
+      function shiftSpectrum(direction) {
+        console.log("shift " + direction);
+        rangeLowElem = document.querySelector('input[name=lowRange]');
+        rangeHighElem = document.querySelector('input[name=highRange]');
+        rangeLow = +(rangeLowElem.value);
+        rangeHigh = +(rangeHighElem.value);
+
+        shiftAmount = rangeHigh - rangeLow; // shifts range the entire screen
+        console.log("shift amount: " + shiftAmount);
+
+        // original low range value
+        // var shiftLow = d3.select("[name=lowRange]").attr("value");
+        // original high range value
+        // var shiftHigh = d3.select("[name=highRange]").attr("value");
+        if (direction == "left") {
+          shiftLow = rangeLow - shiftAmount;
+          shiftHigh = rangeHigh - shiftAmount;
+          rangeLowElem.value = shiftLow;
+          rangeHighElem.value = shiftHigh;
+          console.log("left: " + shiftLow, shiftHigh);
+        } else if (direction == "right") {
+          shiftLow = rangeLow + shiftAmount;
+          shiftHigh = rangeHigh + shiftAmount;
+          rangeLowElem.value = shiftLow;
+          rangeHighElem.value = shiftHigh;
+          console.log("High: " + shiftLow, shiftHigh);
+        }
+      };
+
+      function filterSpectrum(low,high) {
+        console.log("filtering spectrum: " + low + "|" + high );
+      }
+
+      function printSpectrum() {
+        console.log("print");
+      };
+
+      function downloadData(format) {
+        // var container = document.getElementById("spectrum");
+        var svgContainer = document.getElementsByTagName("svg")[0];
+        // output JPG
+        if ( format == "JPG") {
+          console.log("download JPG");
+          saveSvgAsJpg(svgContainer, "FTSspectrum.jpg", {scale: 2, backgroundColor: "#FFFFFF"});
+          // output PNG
+        } else if ( format == "PNG") {
+          saveSvgAsPng(svgContainer, "FTSspectrum.png", {scale: 2, backgroundColor: "#FFFFFF"});
+          // output SVG
+        } else if ( format == "SVG") {
+          console.log("svg")
+          //get svg element.
+            var svg = document.getElementsByTagName("svg")[0];
+            svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            var svgData = svg.outerHTML;
+            var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+            var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+            var svgUrl = URL.createObjectURL(svgBlob);
+            var downloadLink = document.createElement("a");
+            downloadLink.href = svgUrl;
+            downloadLink.download = "FTSspectrum.svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          // output PDF
+        } else if ( format == "PDF") {
+          console.log("download PDF")
+        // output ASCII
+        } else if ( format == "ASCII") {
+          console.log("download ASCII")
+        }
+        // console.log("download: " + format);
+      };
+
+      function download() {
+        console.log("download button clicked");
+      }
+
+      // Below are the functions that handle actual exporting:
+      // getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
+      function getSVGString( svgNode ) {
+      	svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+      	var cssStyleText = getCSSStyles( svgNode );
+      	appendCSS( cssStyleText, svgNode );
+
+      	var serializer = new XMLSerializer();
+      	var svgString = serializer.serializeToString(svgNode);
+      	svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+      	svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+      	return svgString;
+
+      	function getCSSStyles( parentElement ) {
+      		var selectorTextArr = [];
+
+      		// Add Parent element Id and Classes to the list
+      		selectorTextArr.push( '#'+parentElement.id );
+      		for (var c = 0; c < parentElement.classList.length; c++)
+      				if ( !contains('.'+parentElement.classList[c], selectorTextArr) )
+      					selectorTextArr.push( '.'+parentElement.classList[c] );
+
+      		// Add Children element Ids and Classes to the list
+      		var nodes = parentElement.getElementsByTagName("*");
+      		for (var i = 0; i < nodes.length; i++) {
+      			var id = nodes[i].id;
+      			if ( !contains('#'+id, selectorTextArr) )
+      				selectorTextArr.push( '#'+id );
+
+      			var classes = nodes[i].classList;
+      			for (var c = 0; c < classes.length; c++)
+      				if ( !contains('.'+classes[c], selectorTextArr) )
+      					selectorTextArr.push( '.'+classes[c] );
+      		}
+
+      		// Extract CSS Rules
+      		var extractedCSSText = "";
+      		for (var i = 0; i < document.styleSheets.length; i++) {
+      			var s = document.styleSheets[i];
+
+      			try {
+      			    if(!s.cssRules) continue;
+      			} catch( e ) {
+      		    		if(e.name !== 'SecurityError') throw e; // for Firefox
+      		    		continue;
+      		    	}
+
+      			var cssRules = s.cssRules;
+      			for (var r = 0; r < cssRules.length; r++) {
+      				if ( contains( cssRules[r].selectorText, selectorTextArr ) )
+      					extractedCSSText += cssRules[r].cssText;
+      			}
+      		}
+
+
+      		return extractedCSSText;
+
+      		function contains(str,arr) {
+      			return arr.indexOf( str ) === -1 ? false : true;
+      		}
+
+      	}
+
+      	function appendCSS( cssText, element ) {
+      		var styleElement = document.createElement("style");
+      		styleElement.setAttribute("type","text/css");
+      		styleElement.innerHTML = cssText;
+      		var refNode = element.hasChildNodes() ? element.children[0] : null;
+      		element.insertBefore( styleElement, refNode );
+      	}
+      }
+
+
+      function svgString2Image( svgString, width, height, format, callback ) {
+      	var format = format ? format : 'png';
+
+      	var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+
+      	var canvas = document.createElement("canvas");
+      	var context = canvas.getContext("2d");
+
+      	canvas.width = width;
+      	canvas.height = height;
+
+      	var image = new Image();
+      	image.onload = function() {
+      		context.clearRect ( 0, 0, width, height );
+      		context.drawImage(image, 0, 0, width, height);
+
+      		canvas.toBlob( function(blob) {
+      			var filesize = Math.round( blob.length/1024 ) + ' KB';
+      			if ( callback ) callback( blob, filesize );
+      		});
+
+
+      	};
+
+      	image.src = imgsrc;
+      }
+    </script>
+
+</head>
+<body>
+
+
+
+
+      <div class="container">
+  			<div id="headerArea">
+          <div id="nsoLogo"><a href="#"><img src="_images/nso_logo_200_a.png" width="200"/></a></div>
+  				<div id="ftsHeadline"><h3>FTS Explorer</h3></div>
+          <div id="nsfLogo"><a href="#"><img src="_images/NSFlogo_transparent.png" width="100" /></a></div>
+  			</div> <!-- end headerArea -->
+        <div id="content">
+          <div class="sectionOne">
+            <div id = "searchNav">
+              <div id="search">
+                <h2>Wavelength Navigator</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="sectionTwo">
+            <div id="spectrum">
+            </div>
+          </div>
+
+          <div class="sectionThree">
+            <button class="placeBtn" onclick="printSpectrum()"><i class="fas fa-print fa-1x"></i>Print</button>
+            <button class="placeBtn" onclick="downloadData('JPG')"><i class="far fa-file-image fa-1x"></i>Download JPG</button>
+            <button class="placeBtn" onclick="downloadData('PNG')"><i class="far fa-file-image fa-1x"></i>Download PNG</button>
+            <button class="placeBtn" onclick="downloadData('SVG')"><i class="far fa-file-image fa-1x"></i>Download SVG</button>
+            <button class="placeBtn" onclick="downloadData('PDF')"><i class="fas fa-file-pdf fa-1x"></i>Download PDF</button>
+            <button class="placeBtn" onclick="downloadData('ASCII')"><i class="fas fa-file-alt fa-1x"></i>Download ASCII</button>
+          </div>
+
+          <div class='sectionFour'>
+            <div class='row'>
+              <div class='column'>
+                <div class='col1'>
+                  <h2>Atlas Info</h2>
+
+                  <p><i>Information about the atlas that produced the above plot. Source: README.txt that accompanies the visatl information.</i><br /><br />
+                  <strong>An Atlas of the Spectrum of the Solar Photosphere
+                  from 13,500 to 28,000 cm-1 (3570 to 7405A)</p></strong>
+
+                  <p>L. Wallace, K. Hinkle, and W. Livingston, <br />
+                  National Optical Astronomy Observatories.</p>
+
+                  <p>The files collected here were made in conjunction with, and are
+                  intended to be used with, the hard copy of this atlas.
+                  The files with the prefixes "sp" contain the spectral data from which
+                  the plots were made.  Each of these contains a 50 cm-1 region with a 3 cm-1
+                  overlap on each end.  Following the prefix "sp" is the lead frequency of the
+                  segment, e. g., "14150".  For the region 13,500 to 20,000 cm-1, the four
+                  columns of each file contain, first the frequency, second the deduced telluric
+                  spectrum, third the observed photospheric spectrum before correction for
+                  telluric absorption, and fourth the photospheric spectrum corrected for
+                  telluric absorption.  The region 20,000 to 28,000 cm-1 contains no sensible
+                  narrow-line telluric absorbers and consequently the files contain only the
+                  frequencies and the observed spectrum.  The required multiplicative factors to
+                  correct the observed frequencies to the laboratory scale are 1.0000013 for
+                  13,500 to 16,000 cm-1, 0.9999981 for 16,000 to 20,000 cm-1, and 1.0000018 for
+                  20,000 to 28,000 cm-1. </p>
+                  <p>The remaining files are encapsulated post-script files, one per atlas
+                  page.  The prefix "ph" indicates the corrected photospheric spectra in Section
+                  II of the atlas.  The "tr" files are the Section III pages giving atmospheric
+                  transmission and the observed photospheric spectra.  Finally, "cph" and "ctr"
+                  are the compressed photospheric and transmission plots of Section I. </p>
+                </div>
+              </div>
+              <div class='column'>
+                <div class='col2'>
+                  <h2>FTS Backgrounder</h2>
+                  <img src="_images/sun_spectrum_lines_noao_900x600.jpg" width="100%" style="margin-bottom: 20px;">
+                  <p>The Fourier Transform Spectrometer was built between 1971 and 1976. A high-resolution spectrometer, the FTS measured the intensity of light at the National Science Foundation McMath-Pierce Solar Telescope at Kitt Peak in Arizona.</p>
+                  <p>One of the most visible products of this instrument is a reconstruction of the Sun's spectrum; a rainbow of light speckled with black absorption lines representing indications of elements within the Sun's light.</p>
+                  <img src="_images/fts_tank.gif" align="right"><p>The name for the instrument came from the math used to reconstruct the spectrum from interference patterns. A special carriage slides the FTS's optics along a finely polished granite table. This entire assembly is enclosed in a vacuum chamber constantly measured by lasers to ensure precision.</p>
+                  <p>The detailed spectrum the instrument has provided aids not only scientists studying our own Sun but can be used to help model processes of faraway stars.</p>
+                  </p>
+                </div>
+              </div>
+              <div class='column'>
+                <div class='col3'>
+                  <h2>FTS Downloads</h2>
+                  <p>Transformed spectra from the Fourier Transform Spectrometer obtained at the McMath-Pierce Facility from March 31, 1976, to September 6, 1996. The physical sources of these spectra include the sun, planets, stars, the terrestrial atmosphere, and laboratory sources. The spectral range of each observation lies somewhere between 220 and 18,000 nm.</p>
+                  <p>Seven solar spectral atlases from the FTS. You can access the FTS spectral atlases via direct anonymous FTP.</p>
+                    <ul>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/fluxatl/" target="_blank">Flux from 296 to 1300 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/visatl/" target="_blank">Photosphere from 357 to 740.5 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/niratl/" target="_blank">Photosphere from 735 to 1123 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/photatl/" target="_blank">Infrared from 1100 to 5400 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/spot2atl/" target="_blank">Sunspot from 8100 to 21,000 nm plus photosphere from 16,000 to 22,000 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/spot3atl/" target="_blank">Sunspot umbra from 664.2 to 1123 nm</a></li>
+                        <li><a href="ftp://nispdata.nso.edu/pub/atlas/spot1atl/" target="_blank">Sunspot umbra from 1160 to 5100 nm</a></li>
+                    </ul>
+
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div id="footer">
+            <div class="footer_columns_2">
+              <div style="text-align:left; float: left; margin: -10px 20px 0px 50px;"><a href="https://www.nsf.gov" target="_blank"><img src="https://nso.edu/wp-content/uploads/2018/01/NSFlogo_transparent.png" width="130px" height="130px" alt="National Science Foundation"/></a>
+              </div>
+              <div id="nsf_blurb">
+              	<p>The National Solar Observatory (NSO) is the national center for ground-based solar physics in the United States (www.nso.edu) and is operated by the Association of Universities for Research in Astronomy (AURA) under a cooperative agreement with the National Science Foundation Division of Astronomical Sciences.</p>
+              	<p>The National Science Foundation (NSF) is an independent federal agency created by Congress in 1950 to promote the progress of science. NSF supports basic research and people to create knowledge that transforms the future. Please refer to <a href="https://www.nsf.gov" target="_blank">www.nsf.gov</a>.</p>
+              </div>
+            </div>
+
+            <div class="aura_footer">
+              <div style="text-align:center"><a href="//www.aura-astronomy.org"  target="_blank"><img src="https://www.nso.edu/wp-content/uploads/2018/01/AURA-Logo-Medium.png" alt="Association of Universities for Research in Astronomy (AURA) logo" width="207px" height="66px" /></a></div>
+              <div class="other_centers" style="text-align: center; font-size: 14px; font-weight: bold; margin: 5px 0 10px 0;">OTHER AURA CENTERS
+              	</div>
+              <div class="center_logos" style="margin: 0 auto; text-align: center;">
+              	<a href="//nationalastro.org" target="_blank"><img src="https://www.nso.edu/wp-content/uploads/2020/08/NOIRLab-Logo-Large-Horizontal_51px.png" alt="NOIR Lab" width="195px" height="51px" /></a> <a href="//www.lsst.org/" target="_blank"><img src="https://www.nso.edu/wp-content/uploads/2020/08/Rubin-Obs_logo-2_50px.png" width="106px" height="51px" alt="Rubin Observatory" /></a><a href="//www.stsci.edu" target="_blank"><img src="https://www.nso.edu/wp-content/uploads/2018/01/stsci_sec_combo_mark_horizonal_white_bkgd.png" width="133px" height="51px" alt="Space Telescope Science Institute" /></a>
+              </div>
+            </div>
+          </div>
+
+
+
+          </div>
+
+      </div> <!-- end content -->
+    </div> <!-- end container -->
+
+
+
+  <!--- D3 script to create spectrum chart -->
+  <script>
+
+    var dataset;
+    var bisectWavelength = d3.bisector(function(d) { return d.observed_photospheric_spectrum; }).left;
+
+    var margin =  {top: 20, right: 20, bottom: 50, left: 50 },
+        width = window.innerWidth - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    // set the ranges
+    var x = d3.scaleLinear().range([0,width]);
+    var y = d3.scaleLinear().range([height, 0])
+
+
+    // define the line
+    var spectrumLine = d3.line()
+    .curve(d3.curveBasis)
+      .x(function(d) { return x(d.frequency); })
+      // for visatl
+      .y(function(d) { return y(d.observed_photospheric_spectrum); })
+      // for photatl
+      // .y(function(d) { return y(d.atmos_component); })
+
+    // add svg canvas
+    var svg = d3.select("#spectrum")
+      .append("svg")
+        // .attr("width", width + margin.left + margin.right)
+
+        // .attr("viewBox", '0 0 1280 500')
+
+        .attr("width", '98%')
+        .attr("height", height + margin.top + margin.bottom + 30)
+        //.attr('viewBox','0 0 '+Math.min(width,height)+' '+Math.min(width,height))
+        .attr('preserveAspectRatio','xMinYMin')
+      .append("g")
+          .attr("transform",
+                "translate(" + margin.left + "," + (margin.top + 30) + ")")
+
+    svg.
+        style("font-family", "Calibri").
+        style("font-size", "18px").
+        style("font-style", "normal").
+        style("font-variant", "normal").
+        style("font-weight", "normal").
+        style("text-rendering", "optimizeLegibility").
+        style("shape-rendering", "default");
+
+    // gridlines in x axis function
+    function make_x_gridlines() {
+      console.log("x gridlines");
+        return d3.axisBottom(x)
+            .ticks(50)
+    }
+
+    // gridlines in y axis function
+    function make_y_gridlines() {
+      console.log("y gridlines");
+        return d3.axisLeft(y)
+            .ticks(10)
+    }
+
+  // get the data
+
+  function drawSpectrum() {
+  d3.json("_files/visatl/sp13550.json").then(function(data) {
+  // d3.json("_files/visatl/visatl15000-16950.json").then(function(data) {
+  // d3.json("_files/photatl1850-8975.json").then(function(data) {
+    data.forEach(function(d) {
+      d.frequency = d.frequency;
+
+      // for visatl
+      d.obs_spectrum = d.observed_photospheric_spectrum;
+      d.corr_spectrum = d.corrected_photospheric_spectrum;
+      d.telluric_spectrum = d.deduced_telluric_spectrum;
+
+      dataset = data;
+      // drawSpectrum(dataset);
+      // console.log(d.frequency, d.telluric_spectrum,d.obs_spectrum, d.corr_spectrum);
+    });
+
+
+    // update
+        // scale the range of data
+        var dataMin = d3.min(data,function(d) { return d.frequency; });
+        var dataMax = d3.max(data,function(d) { return d.frequency; });
+        var dataMinIndex = d3.minIndex(data,function(d) { return d.frequency; });
+
+        rangeLowNew = dataMin; // (dataMax - ((dataMax - dataMin)/2)) - 200; // document.getElementById("rangeLow").value;
+        rangeHighNew = dataMax; // (dataMax - ((dataMax - dataMin)/2)) + 200; // document.getElementById("rangeHigh").value;
+
+        // console.log(dataMin, dataMax, dataMinIndex, rangeLowNew, rangeHighNew);
+        var newDomain = update(rangeLowNew, rangeHighNew);
+        console.log("domain call: " + newDomain[1]);
+
+
+        x.domain([newDomain[0], newDomain[1]]); //(d3.extent(data,function(d) { return d.frequency; })); // ([13500, 29000])
+        y.domain([0, 1.1]); // d3.max(data,function(d) { return d.obs_spectrum; })]);
+
+
+        // adding SectionOne navigation controls
+        var controls = d3.select(".sectionOne")
+                          .append("div")
+                          .attr("id","controls");
+
+        // navigate left button
+        var navLeft_btn = controls.append("nav")
+                                  .html("<div class='hvr-icon-back'><i class='fa fa-arrow-circle-left fa-3x hvr-icon'></i></div>") // <i class="fa fa-arrow-circle-left fa-3x"  onclick="shiftSpectrum('left')"></i>
+                                  .attr("direction", 'left');
+        // low range input area
+        var lowRangeTextArea = controls.append("input")
+                                        .attr('type', 'text')
+                                        .attr('name', 'lowRange')
+                                        .attr('button', 'resBtn')
+                                        .attr('class', 'spectrumLowInput')
+                                        .attr('value', dataMin)
+
+        /* Filter Button "GO" or "APPLY" with down arrow */
+        var filter_btn = controls.append("nav")
+                                .html("<div class='hvr-icon-hang' style='width: 100px;'><i class='fa fa-chevron-circle-down fa-3x hvr-icon'><br /><span position: relative; width: 100px; style='font-size: .3em; font-family: Open Sans, sans-serif; font-weight: bold; margin: 0px 0 0 0px'>Apply to Chart</span></i></div>")
+                                .attr("state", 0);
+
+        // high range input area
+        var highRangeTextArea = controls.append("input")
+                                        .attr('type', 'text')
+                                        .attr('name', 'highRange')
+                                        .attr('class', 'spectrumHighInput')
+                                        .attr('value', dataMax)
+
+
+        // navigate right button
+        var navRight_btn = controls.append("nav")
+                                  .html("<div class='hvr-icon-forward'><i class='fa fa-arrow-circle-right fa-3x hvr-icon'></i></div>") // <i class="fa fa-arrow-circle-left fa-3x"  onclick="shiftSpectrum('left')"></i>
+                                  .attr("direction", "right");
+
+        // button onclick functions
+        filter_btn.on("click", function(d) {
+          // console.log("filter button clicked")
+          // getting values from specific elements. This was hard!!!!!
+          var lowRange = document.querySelector('input[name=lowRange]').value;
+          var defaultLow = d3.select("[name=lowRange]").attr("value");
+              console.log("default low " + defaultLow + " | new low: " + lowRange);
+          // var lowRange = d3.select("[name=lowRange]").attr("value");
+
+          var highRange = document.querySelector('input[name=highRange]').value;
+          var defaultHigh = d3.select("[name=highRange]").attr("value");
+              console.log("default high: " + defaultHigh + " | new high: " + highRange);
+          // var highRange = d3.select("[name=highRange]").attr("value");
+          filterSpectrum(lowRange,highRange);
+        });
+
+        navLeft_btn.on("click", function(d) {
+          // console.log("navigate Left")
+          var btnDirection = d3.select(this).attr("direction");
+          shiftSpectrum(btnDirection);
+        });
+
+        navRight_btn.on("click", function(d) {
+          // console.log("navigate right")
+          var btnDirection = d3.select(this).attr("direction");
+          shiftSpectrum(btnDirection);
+        });
+
+        // append the line
+        svg.append("path")
+          .data([data])
+          .attr("class", "line")
+          .attr("d", spectrumLine)
+
+        // add x axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // add y axis
+        svg.append("g")
+          .attr("class", "axis")
+          .call(d3.axisLeft(y))
+
+          // converts values in top axis from cm-1 > microns > angstroms
+          var formatNumber = d3.format(",");
+          var formatDecimal = d3.format(",.0f")
+          const topAxis = d3.axisTop(x).tickFormat(function(d) { return formatDecimal((10000/d)*10000) });
+
+        // add top x axis
+        svg.append("g")
+          .attr("class","axis")
+          .attr("transform", "translate(0,0")
+          // .call(d3.axisTop(x));
+          .call(topAxis);
+
+        // add top x axis label (angstroms)
+        svg.append("text")
+            .attr("transform",
+                  "translate(" + (width/2) + " ," +
+                                 (0 - 30 ) + ")") // this moves axis to -30 from top
+            .style("text-anchor", "middle")
+            .text("wavelength (angstroms)");
+
+
+        // add bottom x axis label (cm-1)
+        svg.append("text")
+            .attr("transform",
+                  "translate(" + (width/2) + " ," +
+                                 (height + margin.top + 20 ) + ")")
+            .style("text-anchor", "middle")
+            .text("frequency (cm-1)");
+
+        // add y axis label (spectrum)
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height/2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Observed Photospheric Spectrum");
+
+        // add the X gridlines
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(0," + height + ")")
+            .call(make_x_gridlines()
+                .tickSize(-height)
+                .tickFormat("")
+            );
+
+        // add the Y gridlines
+        svg.append("g")
+            .attr("class", "grid")
+            .call(make_y_gridlines()
+                .tickSize(-width)
+                .tickFormat("")
+            );
+    });
+  }
+
+drawSpectrum(true); // is this initialization?
+
+// add filtering
+function update(rangeLow,rangeHigh) {
+  var newDomain = [rangeLowNew,rangeHighNew]; // ([13500, 29000])
+        console.log("new domain: " + newDomain);
+  return newDomain;
+}
+
+
+  </script>
+
+</body>
+</html>

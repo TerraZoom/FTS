@@ -1,0 +1,415 @@
+@charset "utf-8";
+/* Colors
+dark blue:#2B3843
+medium blue: #3E5062
+footer blue1: #C8D4E1
+footer blue2: #ACBAC8
+light blue: #F7F7F7
+
+*/
+
+/* IMPORT GOOGLE FONTS */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+/* RESET */
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, code,
+del, dfn, em, img, q, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+}
+
+em {
+	font-style: italic;
+}
+
+strong {
+	font-weight: bold;
+}
+
+html,
+body {
+	margin:0;
+	padding:0;
+	height:100%;
+}
+/* /END RESET */
+body {
+	background: #fff;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+  /* margin: 10px 10px; */
+}
+
+p {
+	line-height: 150%;
+	margin: 0 0 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: #2E4A74;
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1 {
+	font-size: 30px;
+	margin: 0 0 15px;
+	font-weight: normal;
+}
+
+h2 {
+	font-size: 24px;
+	margin: 0 0 12px;
+	font-weight: strong;
+}
+
+h3 {
+	font-size: 15px;
+	margin: 0 0 12px;
+	font-weight: normal;
+}
+
+
+h4, h5, h6 {
+	margin: 5px 0 5px;
+	font-weight: bold;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {}
+
+a img {
+	border: none;
+	outline: none;
+}
+
+a {
+	color: #363636;
+	outline: none;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #999;
+}
+
+/* remove dotted lines on some links in FF browser */
+
+a,
+a:active,
+a:visited,
+a img {
+	outline: none;
+}
+
+/* / */
+
+/* CLEARFIX */
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+
+.clearfix {
+	display: inline-block;
+}
+
+html[xmlns] .clearfix {
+	display: block;
+}
+
+* html .clearfix {
+	height: 1%;
+}
+/* /END CLEARFIX */
+
+/*
+=====================================================
+	Layout & Framework
+===================================================== */
+.container { width: 100%; }
+
+/* SectionOne - explorer and input bar */
+.sectionOne { width: 100%; margin: 0px; padding: 10px 0; text-align: center; background-color:#C8D4E1;  }
+/* SectionTwo - spectrum chart */
+.sectionTwo { display: inline-block; width: 100%; padding: 0px; margin:10px 0; }
+/* SectionThree - bottom output bar */
+.sectionThree { display: inline-block; position: relative; left: 0; height: 50px; width:100%; margin: 0px 20px; }
+/* SectionFour - atlas information and fts explanation */
+.sectionFour {text-align: left; float: left; margin: 10px 0px 30px 0; padding: 10px; background-color: #e1e1e1; width: 100%; }
+.infoSection { margin: 0 0px; background-color: #e2e2e2; }
+
+
+.atlasInfo { width: 35%; padding: 20px; }
+.ftsInfo { width: 57%; padding: 20px; }
+
+/* clear floats after the columns */
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 20px;
+}
+
+.column {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+.column p { padding-bottom: 10px; }
+.column p, ul, li { font-family: 'Open Sans', sans-serif; font-size: 1.2em; line-height: 2em; border-radius: 10px; border-width: 4px; border-color: #333; }
+.column ul, li { margin: 0 0 0 20px;}
+.col1 {
+  border-radius: 10px;
+  border: 6px solid #999;
+  padding: 30px;
+  background-color: #d3d3d3;
+  flex: 1;
+}
+
+.col2 {
+  border-radius: 10px;
+  border: 6px solid #999;
+  padding: 30px;
+  background-color: #d3d3d3;
+  flex-grow: 1; /* setss middle element to grow and stretch */
+}
+
+.col3 {
+  border-radius: 10px;
+  border: 6px solid #999;
+  padding: 30px;
+  background-color: #d3d3d3;
+  flex: 1;
+}
+
+
+nav {display: inline-block; padding: 0 20px;}
+#headerArea { background-color:#3E5062; height: 150px; margin: 0 0 0 0px; width: 100%; }
+#nsoLogo { display: inline-block; margin: 5px 0 0 50px; padding: 0 0 0 20px; float: left; width: 200px; }
+#nsfLogo { display: inline-block; width: 100px; float: right; margin: 25px 20px; }
+
+#ftsHeadline { display: inline-block; width: 50%; margin: 0 0 0 -110px; }
+#ftsHeadline h3 { color: #fff; font-size: 60px; margin: 28px 0;}
+#spectrum { display: block; background-color: #fff; width: 98%; height: 540px; border: 1px solid #000; margin: 5px; padding: 30px 0 0 0px; text-align:center; }
+#downloadBtn { position: absolute; right: 20px; top: 20px;}
+
+#toolbar1 { position: relative; display: block; margin: 10px 0; }
+#toolbar2 { position: relative; display: block; margin: 10px 0; }
+#toolbar3 { position: relative; display: block; margin: 10px 0; }
+
+.line { fill:none; stroke: steelblue; stroke-width: 1px; }
+
+#footer {
+   display:inline-block;
+   position: relative;
+    width: 100%;
+    height: 220px;
+    margin: -10px 0 0 0px;
+    background: #C8D4E1 !important;
+    padding: 0px;
+}
+
+.aura_footer {
+  float: right; background: #ACBAC8; padding: 0 0 50px 0; margin: -200px 20px 150px 60%; width: 35%;
+}
+
+.footer_columns_2 {
+  padding: 50px 0;
+  width: 50%;
+  flex-basis: 50%;
+}
+
+/* Style Simple buttons */
+/* white button/dark gray icon, light blue hover/white icon, dark blue select/white icon */
+.btn {
+ background-color: #fff; /* white background */
+ border: 1px solid #333; /* 1px dark blue border */
+ border-radius:6px;
+ color: #999; /* White text */
+ padding: 5px 16px; /* Some padding */
+ font-size: 32px; /* Set a font size */
+ cursor: pointer; /* Mouse pointer on hover */
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+ background-color: #366496;
+}
+
+/* BUTTONS */
+
+.downloadBtn {
+  box-shadow:inset 0px 1px 0px 0px #ffffff;
+  background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+  background-color:#f9f9f9;
+  border-radius:12px;
+  border:1px solid #dcdcdc;
+  display:inline-block;
+  cursor:pointer;
+  color:#666666;
+  font-family:Arial;
+  font-size:12px;
+  font-weight:bold;
+  margin: 0 2px;
+  padding:3px 5px 3px 18px;
+  width: 60px;
+  height: 30px;
+  text-decoration:none;
+  text-shadow:0px 1px 0px #ffffff;
+}
+
+.resBtn {
+  box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+	background-color:#f9f9f9;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#666666;
+	font-family:Arial;
+	font-size:12px;
+	font-weight:bold;
+  margin: 0 2px;
+	padding:6px 24px;
+  width: 200px;
+	height: 80px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+
+.placeBtn {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+	background-color:#f9f9f9;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#666666;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:12px 24px;
+	height: 50px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.placeBtn:hover {
+	background:linear-gradient(to bottom, #e9e9e9 5%, #f9f9f9 100%);
+	background-color:#e9e9e9;
+}
+.placeBtn:active {
+	position:relative;
+	top:1px;
+}
+
+.fa, .fas, .far { margin: -20px 5px 0 0; padding: 0px 0; }
+.fa:hover { color: #6b8eb2;}
+
+.tooltip { /* Container for our tooltip */
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext { /* This is for the tooltip text */
+    width: 100px;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -50px; /* This makes the margin half of the width to the center */
+    visibility: hidden;
+    background-color: #8512d5;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;  /* This defines tooltip text position */
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext { /* Makes tooltip text visible when text is hovered on */
+   visibility: visible;
+}
+
+/* INPUTS */
+.spectrumInput { width: 100px; height: 50px; margin-left:5px; margin-top: 0px; text-align: center; font-family: sans-serif; font-weight: normal; font-size:30px;}
+.spectrumLowInput { width: 100px; height: 50px; margin-left:5px; margin-top: 0px; text-align: center; font-family: sans-serif; font-weight: normal; font-size:30px;}
+.spectrumHighInput { width: 100px; height: 50px; margin-left:5px; margin-top: 0px; text-align: center; font-family: sans-serif; font-weight: normal; font-size:30px;}
+
+
+path {
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.legend {
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+/* Make points visible on hover */
+.points { visibility: hidden; }
+.points:hover { visibility: visible; }
+
+/*
+=====================================================
+	Dynamic Displays
+===================================================== */
+@media (max-width: 800px) {
+  .flex-grid {
+    display: block;
+  }
+}

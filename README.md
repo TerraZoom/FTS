@@ -1,2 +1,2 @@
 # FTS
- FTS Spectrum - Final ATLAS Project
+ FTS spectrum visualization
